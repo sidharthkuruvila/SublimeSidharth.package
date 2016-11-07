@@ -66,9 +66,6 @@ class VcsSiteLinkCommand(sublime_plugin.TextCommand):
                 return path
 
  
-
-
-
 class BitbucketSite:
     path_tpl = 'https://bitbucket.org/{}/src/{}/{}#Line-{}:{}'
 
@@ -77,7 +74,6 @@ class BitbucketSite:
         self.project_path = project_path
         self.commit_id = commit_id
         
-
     def link(self, filename, lines):
         b, e = lines
         file_path = os.path.relpath(filename, start=self.git_dir)
