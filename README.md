@@ -1,6 +1,12 @@
 Some useful Sublime extentions I've written
 ===========================================
 
+Installation on OSX
+-------------------
+
+     cd ~/Library/Application\ Support/Sublime\ Text\ 3/Packages
+     git clone https://github.com/sidharthkuruvila/SublimeSidharth.package.git
+
 Commands
 --------
 
