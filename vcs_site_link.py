@@ -41,16 +41,20 @@ class VcsSiteLinkCommand(sublime_plugin.TextCommand):
         if not git_dir:
             return
 
+        head_ref = open(os.path.join(git_dir, '.git', 'HEAD')).read().strip()[5:]
+        commit_id = open(os.path.join(git_dir, '.git', head_ref)).read().strip()
+        
         config = parse_git_config(os.path.join(git_dir, '.git', 'config'))
         ro_props = find_remote_origin(config)
+
 
         git_url = ro_props['url']
         if 'bitbucket' in git_url:
             project_path = git_url.split(':')[1]
-            return BitbucketSite(git_dir, project_path)
+            return BitbucketSite(git_dir, project_path, commit_id)
         elif 'github.com' in git_url:
             project_path = git_url.split(':')[1]
-            return GithubSite(git_dir, project_path)
+            return GithubSite(git_dir, project_path, commit_id)
         else:
             return
 
@@ -61,31 +65,36 @@ class VcsSiteLinkCommand(sublime_plugin.TextCommand):
             if '.git' in os.listdir(path):
                 return path
 
+ 
+
+
 
 class BitbucketSite:
-    path_tpl = 'https://bitbucket.org/{}/src/master/{}#Line-{}:{}'
+    path_tpl = 'https://bitbucket.org/{}/src/{}/{}#Line-{}:{}'
 
-    def __init__(self, git_dir, project_path):
+    def __init__(self, git_dir, project_path, commit_id):
         self.git_dir = git_dir
         self.project_path = project_path
+        self.commit_id = commit_id
         
 
     def link(self, filename, lines):
         b, e = lines
         file_path = os.path.relpath(filename, start=self.git_dir)
-        return self.path_tpl.format(self.project_path, file_path, b, e)
+        return self.path_tpl.format(self.project_path, self.commit_id, file_path, b, e)
 
 class GithubSite:
-    path_tpl = 'https://github.com/{}/blob/master/{}#L{}-L{}'
+    path_tpl = 'https://github.com/{}/blob/{}/{}#L{}-L{}'
 
-    def __init__(self, git_dir, project_path):
+    def __init__(self, git_dir, project_path, commit_id):
         self.git_dir = git_dir
         self.project_path = project_path[:-4] if project_path.endswith(".git") else project_path
+        self.commit_id = commit_id
 
     def link(self, filename, lines):
         b, e = lines
         file_path = os.path.relpath(filename, start=self.git_dir)
-        return self.path_tpl.format(self.project_path, file_path, b, e)
+        return self.path_tpl.format(self.project_path, self.commit_id, file_path, b, e)
 
 # Hacky config parser
 def parse_git_config(filename):
