@@ -67,7 +67,8 @@ class BitbucketSite:
 
     def __init__(self, git_dir, project_path):
         self.git_dir = git_dir
-        self.project_path = project_path[:-4] if project_path.endswith(".git") else project_path
+        self.project_path = project_path
+        
 
     def link(self, filename, lines):
         b, e = lines
@@ -79,7 +80,7 @@ class GithubSite:
 
     def __init__(self, git_dir, project_path):
         self.git_dir = git_dir
-        self.project_path = project_path
+        self.project_path = project_path[:-4] if project_path.endswith(".git") else project_path
 
     def link(self, filename, lines):
         b, e = lines
