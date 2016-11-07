@@ -22,8 +22,6 @@ class VcsSiteLinkCommand(sublime_plugin.TextCommand):
         region = self.view.sel()[0]
         b = self.row(region.begin())
         e = self.row(region.end())
-
-
         vcs_site = self.guess_vcs_site(filename)
 
         if not vcs_site:
@@ -39,11 +37,8 @@ class VcsSiteLinkCommand(sublime_plugin.TextCommand):
                     props = dict(properties)
                     return props
 
-
-
         git_dir = self.find_git_dir(filename)
         if not git_dir:
-
             return
 
         config = parse_git_config(os.path.join(git_dir, '.git', 'config'))
@@ -53,9 +48,11 @@ class VcsSiteLinkCommand(sublime_plugin.TextCommand):
         if 'bitbucket' in git_url:
             project_path = git_url.split(':')[1]
             return BitbucketSite(git_dir, project_path)
+        elif 'github.com' in git_url:
+            project_path = git_url.split(':')[1]
+            return GithubSite(git_dir, project_path)
         else:
             return
-
 
     def find_git_dir(self, filename):
         path = filename
@@ -70,13 +67,24 @@ class BitbucketSite:
 
     def __init__(self, git_dir, project_path):
         self.git_dir = git_dir
-        self.project_path = project_path
+        self.project_path = project_path[:-4] if project_path.endswith(".git") else project_path
 
     def link(self, filename, lines):
         b, e = lines
         file_path = os.path.relpath(filename, start=self.git_dir)
         return self.path_tpl.format(self.project_path, file_path, b, e)
 
+class GithubSite:
+    path_tpl = 'https://github.com/{}/blob/master/{}#L{}-L{}'
+
+    def __init__(self, git_dir, project_path):
+        self.git_dir = git_dir
+        self.project_path = project_path
+
+    def link(self, filename, lines):
+        b, e = lines
+        file_path = os.path.relpath(filename, start=self.git_dir)
+        return self.path_tpl.format(self.project_path, file_path, b, e)
 
 # Hacky config parser
 def parse_git_config(filename):
