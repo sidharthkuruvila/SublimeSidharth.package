@@ -49,11 +49,16 @@ class VcsSiteLinkCommand(sublime_plugin.TextCommand):
 
 
         git_url = ro_props['url']
-        if 'bitbucket' in git_url:
+        if git_url.startswith('git:'):
             project_path = git_url.split(':')[1]
+        elif git_url.startswith('https:'):
+            project_path = git_url[8:].split('/', 1)[1]
+        else:
+            return
+
+        if 'bitbucket.org' in git_url:
             return BitbucketSite(git_dir, project_path, commit_id)
         elif 'github.com' in git_url:
-            project_path = git_url.split(':')[1]
             return GithubSite(git_dir, project_path, commit_id)
         else:
             return
