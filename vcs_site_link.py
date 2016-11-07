@@ -49,7 +49,7 @@ class VcsSiteLinkCommand(sublime_plugin.TextCommand):
 
 
         git_url = ro_props['url']
-        if git_url.startswith('git:'):
+        if git_url.startswith('git@'):
             project_path = git_url.split(':')[1]
         elif git_url.startswith('https:'):
             project_path = git_url[8:].split('/', 1)[1]
